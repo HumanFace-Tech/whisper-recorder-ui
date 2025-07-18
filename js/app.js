@@ -10,10 +10,11 @@ class WhisperRecorderApp {
     
     this.initializeElements();
     this.initializeEventListeners();
+    
+    // Load configuration FIRST, then initialize APIs with loaded config
+    configManager.load();
     this.initializeAPIs();
     
-    // Load configuration
-    configManager.load();
     configManager.addListener((config) => {
       this.initializeAPIs();
     });
@@ -90,6 +91,12 @@ class WhisperRecorderApp {
 
   initializeAPIs() {
     const config = configManager.config;
+    console.log('=== initializeAPIs called ===');
+    console.log('LLM endpoint:', config.llm.endpoint);
+    console.log('LLM model:', config.llm.model);
+    console.log('LLM apiFormat:', config.llm.apiFormat);
+    console.log('==========================');
+    
     this.whisperAPI = new WhisperAPI(config);
     this.llmAPI = new LLMAPI(config);
   }
@@ -152,21 +159,28 @@ class WhisperRecorderApp {
         throw new Error('No text was transcribed from the audio');
       }
       
-      this.updateStatusSection('transcribe', 'active');
+      // Mark transcription as complete (green) and show content
+      this.updateStatusSection('transcribe', 'completed');
       this.updateContent(this.currentText);
       
       // Step 2: LLM Processing
       this.updateStatusSection('process', 'processing');
       LoadingManager.show('Processing text...');
       
+      console.log('Sending to LLM:', this.currentText); // Debug log
       this.processedText = await this.llmAPI.processText(this.currentText);
+      console.log('LLM response:', this.processedText); // Debug log
       
-      this.updateStatusSection('process', 'active');
+      // Mark processing as complete and show processed content
+      this.updateStatusSection('process', 'completed');
       this.updateStatusSection('transcribe', 'clickable');
       this.updateContent(this.processedText, true);
       
       LoadingManager.hide();
       this.showActionButtons();
+      
+      // Auto-copy to clipboard
+      await this.copyToClipboard(false);
       
       Toast.success('Processing complete!');
       
@@ -206,7 +220,7 @@ class WhisperRecorderApp {
     const element = document.getElementById(`${section}Status`);
     
     // Remove all state classes
-    element.classList.remove('active', 'processing', 'clickable');
+    element.classList.remove('active', 'processing', 'clickable', 'completed');
     
     // Add new state class
     if (state) {
@@ -227,18 +241,16 @@ class WhisperRecorderApp {
       this.updateContent(this.currentText, false);
       // Update visual state
       this.updateStatusSection('transcribe', 'active');
-      this.updateStatusSection('process', this.processedText ? 'clickable' : '');
-      Toast.info('Showing original transcribed text');
+      this.updateStatusSection('process', this.processedText ? 'clickable' : 'completed');
     }
   }
 
   showProcessedText() {
     if (this.processedText) {
       this.updateContent(this.processedText, true);
-      // Update visual state
+      // Update visual state  
       this.updateStatusSection('process', 'active');
       this.updateStatusSection('transcribe', 'clickable');
-      Toast.info('Showing processed text');
     }
   }
 
@@ -299,7 +311,7 @@ class WhisperRecorderApp {
     this.updateContent('Click record to start...');
   }
 
-  async copyToClipboard() {
+  async copyToClipboard(hideButton = true) {
     const textToCopy = this.processedText || this.currentText;
     
     if (!textToCopy) {
@@ -312,7 +324,9 @@ class WhisperRecorderApp {
       
       if (success) {
         Toast.success('Copied to clipboard!');
-        DOMUtils.hide(this.copyButton);
+        if (hideButton) {
+          DOMUtils.hide(this.copyButton);
+        }
       } else {
         Toast.error('Failed to copy to clipboard');
       }

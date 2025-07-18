@@ -4,6 +4,7 @@
   --primary-hover: #45a049;
   --secondary-color: #2196F3;
   --secondary-hover: #1976D2;
+  --success-color: #28a745;
   --danger-color: #f44336;
   --danger-hover: #d32f2f;
   --background-color: #f0f8ff;
@@ -603,6 +604,13 @@ body {
   color: white;
   opacity: 1;
   border-color: var(--primary-color);
+}
+
+.status-item.completed {
+  background: var(--success-color);
+  color: white;
+  opacity: 1;
+  border-color: var(--success-color);
 }
 
 .status-item.processing {

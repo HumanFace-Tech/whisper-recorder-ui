@@ -94,7 +94,6 @@ class LLMAPI {
 
   async processOllama(text) {
     const { llm } = this.config;
-    const prompt = `${llm.systemPrompt}\n\nText to process:\n${text}`;
 
     try {
       const response = await fetch(llm.endpoint, {
@@ -104,7 +103,8 @@ class LLMAPI {
         },
         body: JSON.stringify({
           model: llm.model,
-          prompt: prompt,
+          system: llm.systemPrompt,
+          prompt: `Raw Transcribed Text: ${text}`,
           stream: false
         })
       });
@@ -114,7 +114,7 @@ class LLMAPI {
       }
 
       const data = await response.json();
-      return data.response || 'Error processing text.';
+      return data.response?.trim() || 'Error processing text.';
     } catch (error) {
       console.error('Ollama API error:', error);
       throw new Error(`Text processing failed: ${error.message}`);
@@ -124,29 +124,45 @@ class LLMAPI {
   async processOpenAI(text) {
     const { llm } = this.config;
     
+    console.log('LLM processOpenAI - Input text:', text);
+    console.log('LLM processOpenAI - System prompt:', llm.systemPrompt);
+    
     try {
+      const requestBody = {
+        model: llm.model,
+        messages: [
+          { role: 'system', content: llm.systemPrompt },
+          { role: 'user', content: `Raw Transcribed Text: ${text}` }
+        ],
+        temperature: llm.temperature || 0.3
+      };
+      
+      console.log('LLM processOpenAI - Request body:', requestBody);
+      
       const response = await fetch(llm.endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${llm.apiKey}`
         },
-        body: JSON.stringify({
-          model: llm.model,
-          messages: [
-            { role: 'system', content: llm.systemPrompt },
-            { role: 'user', content: text }
-          ],
-          temperature: 0.3
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.log('LLM API Error Response:', response.status, response.statusText, errorText);
+        throw new Error(`API request failed: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-      return data.choices?.[0]?.message?.content || 'Error processing text.';
+      console.log('LLM processOpenAI - Full response data:', JSON.stringify(data, null, 2));
+      console.log('LLM processOpenAI - Response choices:', data.choices);
+      console.log('LLM processOpenAI - First choice:', data.choices?.[0]);
+      console.log('LLM processOpenAI - Message content:', data.choices?.[0]?.message?.content);
+      
+      const result = data.choices?.[0]?.message?.content?.trim() || 'Error processing text.';
+      console.log('LLM processOpenAI - Final result:', result);
+      return result;
     } catch (error) {
       console.error('OpenAI API error:', error);
       throw new Error(`Text processing failed: ${error.message}`);
