@@ -1,6 +1,6 @@
 // Service Worker for PWA functionality
 
-const CACHE_NAME = 'voice-text-processor-v1';
+const CACHE_NAME = 'whisper-recorder-ui-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -26,10 +26,18 @@ self.addEventListener('install', event => {
         console.error('Failed to cache resources during install:', error);
       })
   );
+  
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
 });
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', event => {
+  // Skip non-HTTP requests (chrome-extension, etc.)
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -39,8 +47,13 @@ self.addEventListener('fetch', event => {
         }
         
         return fetch(event.request).then(response => {
-          // Don't cache non-successful responses
+          // Don't cache non-successful responses or non-basic types
           if (!response || response.status !== 200 || response.type !== 'basic') {
+            return response;
+          }
+
+          // Only cache GET requests
+          if (event.request.method !== 'GET') {
             return response;
           }
 
@@ -78,6 +91,9 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  
+  // Claim all clients immediately
+  return self.clients.claim();
 });
 
 // Handle background sync for offline functionality
