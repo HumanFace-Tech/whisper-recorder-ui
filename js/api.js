@@ -124,9 +124,6 @@ class LLMAPI {
   async processOpenAI(text) {
     const { llm } = this.config;
     
-    console.log('LLM processOpenAI - Input text:', text);
-    console.log('LLM processOpenAI - System prompt:', llm.systemPrompt);
-    
     try {
       const requestBody = {
         model: llm.model,
@@ -136,8 +133,6 @@ class LLMAPI {
         ],
         temperature: llm.temperature || 0.3
       };
-      
-      console.log('LLM processOpenAI - Request body:', requestBody);
       
       const response = await fetch(llm.endpoint, {
         method: 'POST',
@@ -150,18 +145,11 @@ class LLMAPI {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log('LLM API Error Response:', response.status, response.statusText, errorText);
         throw new Error(`API request failed: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('LLM processOpenAI - Full response data:', JSON.stringify(data, null, 2));
-      console.log('LLM processOpenAI - Response choices:', data.choices);
-      console.log('LLM processOpenAI - First choice:', data.choices?.[0]);
-      console.log('LLM processOpenAI - Message content:', data.choices?.[0]?.message?.content);
-      
       const result = data.choices?.[0]?.message?.content?.trim() || 'Error processing text.';
-      console.log('LLM processOpenAI - Final result:', result);
       return result;
     } catch (error) {
       console.error('OpenAI API error:', error);

@@ -174,6 +174,10 @@ class SettingsManager {
           <span class="material-icons">auto_fix_high</span>
           Formatting
         </button>
+        <a href="https://github.com/HumanFace-Tech/whisper-recorder-ui" target="_blank" rel="noopener noreferrer" class="settings-tab-link">
+          <span class="material-icons">code</span>
+          Source
+        </a>
       </div>
       
       <div class="settings-tab-content ${this.activeTab === 'general' ? 'active' : ''}" data-content="general">
@@ -490,29 +494,21 @@ class SettingsManager {
   }
 
   applyPreset(presetKey) {
-    console.log('=== Applying preset:', presetKey, '===');
     const preset = PRESETS[presetKey];
     if (!preset) return;
 
-    console.log('Preset config:', preset.config);
-    
     // Deep merge the preset configuration with existing config
     const currentConfig = configManager.config;
-    console.log('Current config before preset:', JSON.stringify(currentConfig, null, 2));
     
     // Apply whisper settings from preset
     if (preset.config.whisper) {
       Object.assign(currentConfig.whisper, preset.config.whisper);
-      console.log('Applied whisper preset:', preset.config.whisper);
     }
     
     // Apply LLM settings from preset
     if (preset.config.llm) {
       Object.assign(currentConfig.llm, preset.config.llm);
-      console.log('Applied LLM preset:', preset.config.llm);
     }
-    
-    console.log('Current config after preset:', JSON.stringify(currentConfig, null, 2));
     
     // Save the updated configuration
     configManager.save();
@@ -525,7 +521,6 @@ class SettingsManager {
     
     // Show success message
     Toast.success(`Applied ${preset.name} preset - check Voice & Formatting tabs`);
-    console.log('=== Preset application complete ===');
   }
 
   highlightActivePreset(activePresetKey) {

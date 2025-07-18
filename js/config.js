@@ -14,7 +14,7 @@ const DEFAULT_CONFIG = {
     temperature: 0.7,
     enabled: true,
     systemPrompt: `You are a tool - a text processing assistant. Take the raw transcribed text and:
-1. Fix any grammar, spelling or transcribing issues (especially when it comes for programming terms, example 'length views integration' should become 'LangFuse Integration' and "slash var slash www" should become "/var/www".
+1. Fix any grammar, spelling or transcribing issues (especially when it comes for programming terms, example 'length views integration' should become 'LangFuse Integration' and "slash var slash www" should become "/var/www"; or "c colon slash slash dubdubdub" should become "c://www".
 2. Add proper punctuations
 3. Format into clean, readable paragraphs
 4. No meaning or intent changes. Try to do minimal modifications - your focus is formatting!
@@ -32,25 +32,19 @@ class ConfigManager {
   }
 
   load() {
-    console.log('=== ConfigManager.load() called ===');
     try {
       const saved = localStorage.getItem('whisper-recorder-config');
-      console.log('Raw localStorage value exists:', !!saved);
       
       if (saved) {
         const parsed = JSON.parse(saved);
         this.config = this.mergeConfig(DEFAULT_CONFIG, parsed);
-        console.log('Loaded config - LLM model:', this.config.llm.model);
       } else {
-        console.log('No saved config found, using defaults');
         this.config = { ...DEFAULT_CONFIG };
       }
     } catch (error) {
       console.warn('Failed to load config:', error);
       this.config = { ...DEFAULT_CONFIG };
     }
-    
-    console.log('==================================');
     
     this.notifyListeners();
     return this.config;

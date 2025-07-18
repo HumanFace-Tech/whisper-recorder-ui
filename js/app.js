@@ -91,12 +91,6 @@ class WhisperRecorderApp {
 
   initializeAPIs() {
     const config = configManager.config;
-    console.log('=== initializeAPIs called ===');
-    console.log('LLM endpoint:', config.llm.endpoint);
-    console.log('LLM model:', config.llm.model);
-    console.log('LLM apiFormat:', config.llm.apiFormat);
-    console.log('==========================');
-    
     this.whisperAPI = new WhisperAPI(config);
     this.llmAPI = new LLMAPI(config);
   }
@@ -167,9 +161,7 @@ class WhisperRecorderApp {
       this.updateStatusSection('process', 'processing');
       LoadingManager.show('Processing text...');
       
-      console.log('Sending to LLM:', this.currentText); // Debug log
       this.processedText = await this.llmAPI.processText(this.currentText);
-      console.log('LLM response:', this.processedText); // Debug log
       
       // Mark processing as complete and show processed content
       this.updateStatusSection('process', 'completed');
