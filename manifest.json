@@ -1,13 +1,13 @@
 {
-  "name": "Voice to Text Processor",
-  "short_name": "VoiceText",
+  "name": "Whisper Recorder UI",
+  "short_name": "WhisperRecUI",
   "description": "Simple voice recorder with AI-powered text processing",
-  "start_url": "/",
+  "start_url": "https://humanface-tech.github.io/whisper-recorder-ui/",
   "display": "standalone",
   "background_color": "#f0f8ff",
   "theme_color": "#4CAF50",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": "https://humanface-tech.github.io/whisper-recorder-ui/",
   "lang": "en-US",
   "categories": ["productivity", "utilities"],
   "icons": [
@@ -61,24 +61,26 @@
     }
   ],
   "features": [
-    "Cross Platform",
-    "fast",
-    "simple"
+    "voice recording",
+    "voice to text",
+    "transcription",
+    "audio processing",
+    "AI-powered"
   ],
   "screenshots": [
     {
       "src": "assets/screenshot-wide.png",
-      "sizes": "1280x720",
+      "sizes": "1245x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Voice to Text Processor - Desktop view"
+      "label": "Whisper Recorder UI - Desktop view"
     },
     {
       "src": "assets/screenshot-narrow.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Voice to Text Processor - Mobile view"
+      "label": "Whisper Recorder UI - Mobile view"
     }
   ]
 }
