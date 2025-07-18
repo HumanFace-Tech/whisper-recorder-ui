@@ -1,40 +1,77 @@
-# Portable Whisper ASR Recorder UI
+# Whisper Recorder UI v2
 
-A standalone, fully browser-based transcription tool that combines speech recognition with AI text formatting - requires no server to run!
+A streamlined Progressive Web App (PWA) for voice transcription that combines speech recognition with AI text formatting - now with enhanced mobile support and an improved user experience!
 
-## Introduction
+![Whisper Recorder UI v2 Preview](assets/pwa-preview-v2.png)
 
-This tool allows you to record audio directly in your browser, transcribe it using Whisper ASR (Automatic Speech Recognition), and then process the transcription with an LLM (Large Language Model) to improve formatting, fix grammar, and clean up the text.
+## What's New in v2
 
-![Whisper ASR Recorder UI Demo](https://nikro.me/static/74b20604596fcb78ffa333bbfc8d552e/example.gif)
+✨ **Streamlined Settings Interface**: New tabbed configuration panel with organized sections for Whisper, LLM, and system settings
 
-### How It Works
+🎯 **Quick Setup Presets**: One-click configuration presets for popular setups (Local, Groq Cloud, Hybrid)
 
-1. **Recording**: Captures audio directly from your browser using the Web Audio API
-2. **Transcription**: Sends the audio to a Whisper ASR service (either local or cloud-based)
-3. **Processing**: Sends the raw transcription to an LLM for formatting and refinement
-4. **Output**: Displays both the raw transcription and the processed text, with an option to copy to clipboard
+📱 **Mobile-Optimized Design**: Responsive layout that works beautifully on phones, tablets, and desktops
 
-The entire app runs in a single HTML file with no dependencies, making it highly portable and easy to use without installation.
+🚀 **Progressive Web App (PWA)**: Install it like a native app on any device and use it offline
 
-For more information read the [Voice to Code - Blog Article](https://nikro.me/articles/professional/whisper-voice-code/).
+⚡ **Enhanced Performance**: Better layout management and optimized for all screen sizes
 
-## Setup Guide
+## Installation & Usage
 
-### Quick Start
+### 🌐 **Use Online (Instant)**
+Visit: **[https://humanface-tech.github.io/whisper-recorder-ui/](https://humanface-tech.github.io/whisper-recorder-ui/)**
 
-1. Download the `index.html` file
-2. Open it directly in your browser
-3. Click the ⚙️ icon to configure your settings
-4. Start recording!
+### 📱 **Install as PWA (Recommended)**
 
-### Detailed Setup Options
+**On Desktop (Chrome/Edge/Safari):**
+1. Visit the web app URL
+2. Look for the "Install" button in the address bar
+3. Click "Install" to add it to your desktop
+4. Launch from your desktop like any native app
 
-#### Option 1: Local Setup (Self-hosted Services)
+**On Mobile (iOS/Android):**
+1. Open the web app in your mobile browser
+2. **iOS**: Tap the "Share" button → "Add to Home Screen"
+3. **Android**: Tap the menu (⋮) → "Add to Home Screen" or "Install App"
+4. The app will appear on your home screen
+
+**On Desktop (Alternative):**
+1. Click the browser menu (⋮)
+2. Select "Install Whisper Recorder UI..."
+3. Confirm installation
+
+### 💾 **Download & Run Locally**
+1. Download the repository files
+2. Open `index.html` in any modern browser
+3. No server required - runs entirely in your browser!
+
+## How It Works
+
+1. **🎤 Recording**: Captures high-quality audio directly from your browser using the Web Audio API
+2. **🔤 Transcription**: Sends the audio to a Whisper ASR service (local or cloud-based) for speech-to-text conversion
+3. **🤖 AI Processing**: Sends the raw transcription to an LLM for intelligent formatting, grammar fixes, and text refinement
+4. **📋 Output**: Displays both raw transcription and processed text with one-click copy to clipboard
+
+The entire app runs client-side with no backend dependencies, making it completely portable and privacy-friendly.
+
+*For detailed technical background, read the [Voice to Code - Blog Article](https://nikro.me/articles/professional/whisper-voice-code/).*
+
+## Quick Setup with Presets
+
+v2 introduces **one-click configuration presets** for the most popular setups. Just click the ⚙️ settings icon and choose:
+
+- **🏠 Local Setup**: Use locally running Whisper + Ollama services
+- **☁️ Groq Cloud**: Full cloud setup with Groq's APIs (fastest to get started)
+- **🔄 Hybrid**: Local Whisper + cloud LLM (best of both worlds)
+
+## Detailed Setup Options
+
+### Option 1: Local Setup (Self-hosted Services)
 
 This configuration uses locally running instances of Whisper ASR and Ollama for LLM processing:
 
 1. **Install and Run Local Whisper ASR Service**:
+
    ```bash
    # Using Docker
    docker pull onerahmet/openai-whisper-asr-webservice:latest
@@ -42,6 +79,7 @@ This configuration uses locally running instances of Whisper ASR and Ollama for 
    ```
 
 2. **Install and Run Ollama**:
+
    ```bash
    # Install Ollama (MacOS/Linux)
    curl -fsSL https://ollama.com/install.sh | sh
@@ -60,9 +98,9 @@ This configuration uses locally running instances of Whisper ASR and Ollama for 
    - LLM Endpoint: `http://localhost:11434/api/generate`
    - LLM Model: `qwen2.5-coder:14b`
 
-Alternatively - you can use this fork: https://github.com/HumanFace-Tech/whisper-asr-with-ui
+Alternatively - you can use this fork: [HumanFace-Tech/whisper-asr-with-ui](https://github.com/HumanFace-Tech/whisper-asr-with-ui)
 
-#### Option 2: Cloud-based Setup with Groq (No Local Services)
+### Option 2: Cloud-based Setup with Groq (No Local Services)
 
 This configuration uses cloud services for both ASR and LLM processing:
 
@@ -81,7 +119,7 @@ This configuration uses cloud services for both ASR and LLM processing:
    - LLM Model: `gemma2-9b-it` (from our tests - it works the best and is cost-effective)
    - API Key: `[Your Groq API Key]`
 
-#### Option 3: Hybrid Setup (Local Whisper + Cloud LLM)
+### Option 3: Hybrid Setup (Local Whisper + Cloud LLM)
 
 This combines local Whisper ASR with a cloud LLM service like Groq:
 
@@ -120,6 +158,14 @@ This tool is designed to be flexible and expandable. We welcome contributions to
 - **UI Improvements**: Suggestions for better usability while maintaining the single-file approach
 
 If you'd like to contribute or have suggestions, please feel free to fork the project or submit your ideas.
+
+---
+
+## About
+
+🎯 **Vibe-coded with passion** at [**HumanFace Tech**](https://www.humanfacetech.com/about) - where we build tools that actually make sense and work the way you'd expect them to.
+
+*Like this project? Check out what else we're building at HumanFace Tech!*
 
 ## License
 
