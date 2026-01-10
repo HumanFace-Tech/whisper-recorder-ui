@@ -1,0 +1,15 @@
+# Core
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+Thumbs.db
+
+# Project-specific
+REFACTORING_SUMMARY.md
