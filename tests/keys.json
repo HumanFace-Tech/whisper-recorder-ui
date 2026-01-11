@@ -1,0 +1,5 @@
+{
+  "openai_api_key": "",
+  "groq_api_key": "",
+  "ollama_endpoint": "http://localhost:11434/api/generate"
+}

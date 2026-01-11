@@ -1,5 +1,38 @@
 // API management for Whisper transcription and LLM processing
 
+class APIHelper {
+  static async parseResponse(response) {
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      return text;
+    }
+  }
+
+  static extractText(data) {
+    if (!data) return '';
+    if (typeof data === 'string') return data.trim();
+    
+    // Standard OpenAI/Groq path
+    if (data.choices?.[0]?.message?.content) return data.choices[0].message.content.trim();
+    if (data.choices?.[0]?.text) return data.choices[0].text.trim();
+    
+    // Ollama /api/generate path
+    if (data.response) return data.response.trim();
+    
+    // Ollama /api/chat path
+    if (data.message?.content) return data.message.content.trim();
+    
+    // Various fallbacks
+    const fallback = data.text || data.content || data.generated_text || data.output || data.result;
+    if (fallback) return String(fallback).trim();
+    
+    // If it's an object but we don't recognize the keys, return stringified or empty
+    return typeof data === 'object' ? JSON.stringify(data) : String(data);
+  }
+}
+
 class WhisperAPI {
   constructor(config) {
     this.config = config;
@@ -19,13 +52,15 @@ class WhisperAPI {
 
   async transcribeLocal(audioBlob) {
     const { whisper } = this.config;
-    const formData = new FormData();
-    formData.append('audio_file', audioBlob, 'recording.wav');
-    formData.append('task', 'transcribe');
-    formData.append('language', 'auto');
-    formData.append('output', 'txt');
+    
+    // Some local servers expect 'audio_file', others 'file'
+    const tryTranscribe = async (fieldName) => {
+      const formData = new FormData();
+      formData.append(fieldName, audioBlob, 'recording.wav');
+      formData.append('task', 'transcribe');
+      formData.append('language', 'auto');
+      formData.append('output', 'txt');
 
-    try {
       const response = await fetch(whisper.endpoint, {
         method: 'POST',
         body: formData
@@ -35,11 +70,20 @@ class WhisperAPI {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.text();
-      return result.trim();
+      const result = await APIHelper.parseResponse(response);
+      return APIHelper.extractText(result);
+    };
+
+    try {
+      return await tryTranscribe('audio_file');
     } catch (error) {
-      console.error('Local Whisper API error:', error);
-      throw new Error(`Transcription failed: ${error.message}`);
+      console.warn('Failed with audio_file, trying file...', error);
+      try {
+        return await tryTranscribe('file');
+      } catch (retryError) {
+        console.error('Local Whisper API error:', retryError);
+        throw new Error(`Transcription failed: ${retryError.message}`);
+      }
     }
   }
 
@@ -48,7 +92,7 @@ class WhisperAPI {
     const formData = new FormData();
     formData.append('file', audioBlob, 'recording.wav');
     formData.append('model', whisper.model);
-    formData.append('response_format', 'text');
+    formData.append('response_format', 'json'); // More reliable than 'text' for parsing
 
     try {
       const response = await fetch(whisper.endpoint, {
@@ -60,14 +104,35 @@ class WhisperAPI {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await APIHelper.parseResponse(response);
+        const msg = errorData.error?.message || response.statusText;
+        throw new Error(`API error: ${response.status} - ${msg}`);
       }
 
-      const result = await response.text();
-      return result.trim();
+      const result = await APIHelper.parseResponse(response);
+      return APIHelper.extractText(result);
     } catch (error) {
       console.error('OpenAI Whisper API error:', error);
       throw new Error(`Transcription failed: ${error.message}`);
+    }
+  }
+
+  async testConnection() {
+    const { whisper } = this.config;
+    if (!whisper.endpoint) throw new Error('Endpoint is required');
+
+    try {
+      if (whisper.apiFormat === 'local') {
+        const response = await fetch(whisper.endpoint.replace('/asr', '/'), { method: 'GET' });
+        if (!response.ok) throw new Error(`Server returned status ${response.status}`);
+        return true;
+      } else {
+        const response = await fetch(whisper.endpoint, { method: 'OPTIONS' });
+        if (response.ok || response.status === 405 || response.status === 401) return true;
+        throw new Error(`Endpoint returned status ${response.status}`);
+      }
+    } catch (error) {
+      throw new Error(`Connection failed: ${error.message}`);
     }
   }
 }
@@ -92,29 +157,62 @@ class LLMAPI {
     }
   }
 
-  async processOllama(text) {
+  async testConnection() {
     const { llm } = this.config;
+    if (!llm.endpoint) throw new Error('Endpoint is required');
 
     try {
+      if (llm.apiFormat === 'ollama') {
+        const baseUrl = new URL(llm.endpoint).origin;
+        const response = await fetch(`${baseUrl}/api/tags`);
+        if (!response.ok) throw new Error(`Ollama status: ${response.status}`);
+        return true;
+      } else if (llm.apiFormat === 'openai') {
+        const baseUrl = llm.endpoint.split('/chat/completions')[0];
+        const response = await fetch(`${baseUrl}/models`, {
+          headers: { 'Authorization': `Bearer ${llm.apiKey}` }
+        });
+        if (response.status === 401) throw new Error('Invalid API Key');
+        if (!response.ok) throw new Error(`Server status: ${response.status}`);
+        return true;
+      }
+      return true;
+    } catch (error) {
+      throw new Error(`Connection failed: ${error.message}`);
+    }
+  }
+
+  async processOllama(text) {
+    const { llm } = this.config;
+    const isChat = llm.endpoint.includes('/api/chat');
+
+    try {
+      const body = isChat ? {
+        model: llm.model,
+        messages: [
+          { role: 'system', content: llm.systemPrompt },
+          { role: 'user', content: text }
+        ],
+        stream: false
+      } : {
+        model: llm.model,
+        system: llm.systemPrompt,
+        prompt: `Raw Transcribed Text: ${text}`,
+        stream: false
+      };
+
       const response = await fetch(llm.endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: llm.model,
-          system: llm.systemPrompt,
-          prompt: `Raw Transcribed Text: ${text}`,
-          stream: false
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`Ollama error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data.response?.trim() || 'Error processing text.';
+      const data = await APIHelper.parseResponse(response);
+      return APIHelper.extractText(data) || 'Error processing text.';
     } catch (error) {
       console.error('Ollama API error:', error);
       throw new Error(`Text processing failed: ${error.message}`);
@@ -144,13 +242,13 @@ class LLMAPI {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API request failed: ${response.status} - ${errorText}`);
+        const errorData = await APIHelper.parseResponse(response);
+        const msg = errorData.error?.message || response.statusText;
+        throw new Error(`API error: ${response.status} - ${msg}`);
       }
 
-      const data = await response.json();
-      const result = data.choices?.[0]?.message?.content?.trim() || 'Error processing text.';
-      return result;
+      const data = await APIHelper.parseResponse(response);
+      return APIHelper.extractText(data) || 'Error processing text.';
     } catch (error) {
       console.error('OpenAI API error:', error);
       throw new Error(`Text processing failed: ${error.message}`);
@@ -170,7 +268,12 @@ class LLMAPI {
         body: JSON.stringify({
           model: llm.model,
           prompt: text,
-          system: llm.systemPrompt
+          system: llm.systemPrompt,
+          // Support chat-like custom endpoints too
+          messages: [
+            { role: 'system', content: llm.systemPrompt },
+            { role: 'user', content: text }
+          ]
         })
       });
 
@@ -178,15 +281,8 @@ class LLMAPI {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      
-      // Generic handler for various response formats
-      return data.text || 
-             data.content || 
-             data.response || 
-             data.generated_text || 
-             data.output ||
-             'Error processing text.';
+      const data = await APIHelper.parseResponse(response);
+      return APIHelper.extractText(data) || 'Error processing text.';
     } catch (error) {
       console.error('Custom API error:', error);
       throw new Error(`Text processing failed: ${error.message}`);

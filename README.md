@@ -133,6 +133,16 @@ This combines local Whisper ASR with a cloud LLM service like Groq:
    - LLM Model: `gemma2-9b-it`
    - API Key: `[Your Groq API Key]`
 
+### Enhanced API Resilience
+
+`js/api.js` now uses `APIHelper` for robust handling of diverse providers:
+
+- **Ollama Endpoints**: Set LLM endpoint to `/api/chat` (messages format) or `/api/generate` (prompt format) – auto-detected, no extra config.
+- **Local Whisper Servers**: Supports varying field names (`audio_file` fallback to `file`). Works with Docker images like `onerahmet/openai-whisper-asr-webservice`.
+- **Universal Responses**: Extracts text from OpenAI/Groq (`choices[0].message.content`), Ollama, or custom formats.
+
+Just enter your endpoint/model – resilience handles the rest.
+
 ## Troubleshooting
 
 - **Transcription fails**: Check that your Whisper service is running and accessible
