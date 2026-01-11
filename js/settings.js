@@ -283,12 +283,19 @@ class SettingsManager {
           <div class="form-row">
             <label for="whisper-model">Model</label>
             <select id="whisper-model">
-              <option value="whisper-large-v3-turbo" ${whisper.model === 'whisper-large-v3-turbo' ? 'selected' : ''}>
-                whisper-large-v3-turbo (Fast, multilingual - recommended)
-              </option>
-              <option value="whisper-large-v3" ${whisper.model === 'whisper-large-v3' ? 'selected' : ''}>
-                whisper-large-v3 (Highest accuracy)
-              </option>
+              <optgroup label="Groq Models">
+                <option value="whisper-large-v3-turbo" ${whisper.model === 'whisper-large-v3-turbo' ? 'selected' : ''}>
+                  whisper-large-v3-turbo (Fast, multilingual - recommended)
+                </option>
+                <option value="whisper-large-v3" ${whisper.model === 'whisper-large-v3' ? 'selected' : ''}>
+                  whisper-large-v3 (Highest accuracy)
+                </option>
+              </optgroup>
+              <optgroup label="OpenAI Models">
+                <option value="whisper-1" ${whisper.model === 'whisper-1' ? 'selected' : ''}>
+                  whisper-1 (General-purpose, multilingual)
+                </option>
+              </optgroup>
             </select>
           </div>
           
