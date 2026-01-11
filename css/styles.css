@@ -30,24 +30,30 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background: var(--background-color);
   color: var(--text-color);
   line-height: 1.5;
-  height: 100vh;
-  overflow-x: hidden;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0;
 }
 
 /* Layout */
 .app-container {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: calc(100vh - 60px); /* 100vh minus footer height (approx 60px) */
-  padding: 60px var(--spacing-md) 0;
+  width: 100%;
+  padding: 60px var(--spacing-md) var(--spacing-lg);
   box-sizing: border-box;
 }
 
@@ -903,8 +909,6 @@ body {
   
   .app-container {
     padding: 70px var(--spacing-sm) 0;
-    height: calc(100vh - 60px);
-    height: calc(100dvh - 60px);
   }
   
   .main-card {
@@ -945,6 +949,8 @@ body {
   .content-box {
     padding: var(--spacing-md);
     font-size: 0.95rem;
+    max-height: none;
+    overflow-y: visible;
   }
   
   .settings-panel {
@@ -1056,10 +1062,12 @@ body {
   padding: var(--spacing-sm) 0;
   border-top: 1px solid var(--border-color);
   width: 100%;
-  height: 60px; /* Fixed height for calculation */
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--background-color);
+  z-index: 10;
 }
 
 .footer-text {

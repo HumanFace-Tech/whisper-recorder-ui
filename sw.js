@@ -1,6 +1,6 @@
 // Service Worker for PWA functionality
 
-const CACHE_NAME = 'whisper-recorder-ui-v2.6';
+const CACHE_NAME = 'whisper-recorder-ui-v3.9';
 const urlsToCache = [
   '/',
   '/index.html',
