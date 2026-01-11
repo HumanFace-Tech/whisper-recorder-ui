@@ -156,6 +156,7 @@ class WhisperRecorderApp {
       // Mark transcription as complete (green) and show content
       this.updateStatusSection('transcribe', 'completed');
       this.updateContent(this.currentText);
+      this.showActionButtons();
       
       // Step 2: LLM Processing
       this.updateStatusSection('process', 'processing');
@@ -172,7 +173,7 @@ class WhisperRecorderApp {
       this.showActionButtons();
       
       // Auto-copy to clipboard
-      await this.copyToClipboard(false);
+      await this.copyToClipboard();
       
       Toast.success('Processing complete!');
       
@@ -303,7 +304,7 @@ class WhisperRecorderApp {
     this.updateContent('Click record to start...');
   }
 
-  async copyToClipboard(hideButton = true) {
+  async copyToClipboard() {
     const textToCopy = this.processedText || this.currentText;
     
     if (!textToCopy) {
@@ -316,9 +317,6 @@ class WhisperRecorderApp {
       
       if (success) {
         Toast.success('Copied to clipboard!');
-        if (hideButton) {
-          DOMUtils.hide(this.copyButton);
-        }
       } else {
         Toast.error('Failed to copy to clipboard');
       }
