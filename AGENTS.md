@@ -29,6 +29,34 @@ As a vanilla JS project, standard `npm` or `node` commands do not apply.
   - **Single Test**: If you need to test a specific logic (e.g., API response handling), create a temporary `test-case.html` that imports the relevant JS files and asserts behavior.
   - **PWA Check**: Verify `sw.js` updates if core assets change.
 
+### **Dealing with Browser Cache & Service Worker**
+Since this is a PWA with aggressive caching, you may encounter stale code issues during development:
+
+1. **Python HTTP Server**: If you're testing locally via `python3 -m http.server 8080`, **restart the server** after making code changes to ensure fresh files are served.
+   ```bash
+   # Find and kill the server
+   ps aux | grep "http.server 8080" | grep -v grep
+   kill <PID>
+   
+   # Restart
+   python3 -m http.server 8080
+   ```
+
+2. **Service Worker Cache**: The PWA's service worker (`sw.js`) caches all assets. To force a refresh:
+   - **Via Playwright**: Use `playwright_browser_press_key` with `Control+Shift+R` to perform a hard refresh
+   - **Manually**: Ctrl+Shift+R (or Cmd+Shift+R on Mac) in the browser
+   - **Programmatically**: Use `playwright_browser_evaluate` to unregister the service worker and clear caches:
+     ```javascript
+     async () => {
+       const registrations = await navigator.serviceWorker.getRegistrations();
+       for (let reg of registrations) await reg.unregister();
+       const cacheNames = await caches.keys();
+       for (let name of cacheNames) await caches.delete(name);
+     }
+     ```
+
+3. **Cache Version**: When deploying changes, always increment the `CACHE_NAME` version in `sw.js` (e.g., `v2.3` → `v2.4`).
+
 ## 3. Code Style & Conventions
 
 ### JavaScript (ES6+)

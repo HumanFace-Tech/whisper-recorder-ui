@@ -14,7 +14,7 @@ const PRESETS = {
       llm: {
         endpoint: 'https://api.groq.com/openai/v1/chat/completions',
         apiFormat: 'openai',
-        model: 'gemma2-9b-it',
+        model: 'openai/gpt-oss-20b',
         apiKey: '', // User needs to fill this in
         enabled: true,
         temperature: 0.3,
@@ -294,7 +294,7 @@ class SettingsManager {
           </div>
           
           <div class="form-row">
-            <button class="btn btn-secondary btn-sm" id="test-whisper-connection">
+            <button class="btn btn-secondary btn-sm test-connection-btn" id="test-whisper-connection" type="button">
               <span class="material-icons">cloud_done</span>
               Test Connection
             </button>
@@ -383,7 +383,7 @@ class SettingsManager {
           </div>
 
           <div class="form-row">
-            <button class="btn btn-secondary btn-sm" id="test-llm-connection">
+            <button class="btn btn-secondary btn-sm test-connection-btn" id="test-llm-connection" type="button">
               <span class="material-icons">cloud_done</span>
               Test Connection
             </button>
@@ -504,6 +504,10 @@ class SettingsManager {
   }
 
   async testConnection(type) {
+    // Save current form values before testing
+    this.updateConfigFromForm();
+    configManager.save();
+    
     const config = configManager.config;
     const btn = document.getElementById(`test-${type}-connection`);
     const originalContent = btn.innerHTML;

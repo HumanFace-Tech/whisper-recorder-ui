@@ -123,15 +123,26 @@ class WhisperAPI {
 
     try {
       if (whisper.apiFormat === 'local') {
+        // Local Whisper: test the root endpoint
         const response = await fetch(whisper.endpoint.replace('/asr', '/'), { method: 'GET' });
         if (!response.ok) throw new Error(`Server returned status ${response.status}`);
         return true;
       } else {
-        const response = await fetch(whisper.endpoint, { method: 'OPTIONS' });
-        if (response.ok || response.status === 405 || response.status === 401) return true;
-        throw new Error(`Endpoint returned status ${response.status}`);
+        // OpenAI/Groq Compatible: test /models endpoint instead of /audio/transcriptions
+        // because /audio/transcriptions blocks OPTIONS preflight but actual POST works fine
+        const baseUrl = whisper.endpoint.split('/audio/transcriptions')[0];
+        const headers = whisper.apiKey ? { 'Authorization': `Bearer ${whisper.apiKey}` } : {};
+        const response = await fetch(`${baseUrl}/models`, { headers });
+        
+        if (response.status === 401) throw new Error('Invalid API Key');
+        if (!response.ok) throw new Error(`Server status: ${response.status}`);
+        return true;
       }
     } catch (error) {
+      // Provide helpful message for CORS errors
+      if (error.message.includes('fetch')) {
+        throw new Error(`Connection failed. Note: Recording may still work even if this test fails due to CORS restrictions.`);
+      }
       throw new Error(`Connection failed: ${error.message}`);
     }
   }
@@ -231,7 +242,7 @@ class LLMAPI {
         ],
         temperature: llm.temperature || 0.3
       };
-      
+
       const response = await fetch(llm.endpoint, {
         method: 'POST',
         headers: {

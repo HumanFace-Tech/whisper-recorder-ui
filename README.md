@@ -149,7 +149,14 @@ Just enter your endpoint/model – resilience handles the rest.
 - **API Connection Issues**: If connecting to external services, ensure your API key is valid and correctly entered
 - **LLM processing fails**: Verify the model name exists and is spelled correctly
 - **No audio recording**: Ensure your browser has microphone permissions
-- **Cross-Origin Errors**: If using the app directly from a file, some services might block requests due to CORS policies
+- **Cross-Origin Errors (CORS)**: This app runs entirely in the browser, which means direct calls to cloud APIs (like Groq, OpenAI) may be blocked by CORS policies:
+  - **Test Connection may fail** for Whisper endpoints (OPTIONS preflight blocked) but work for LLM endpoints (`/models`)
+  - **For production use with cloud APIs**, you'll need:
+    - A CORS proxy (e.g., [cors-anywhere](https://github.com/Rob--W/cors-anywhere))
+    - A browser extension that bypasses CORS
+    - Or deploy with a backend proxy
+  - **Local APIs (Ollama, Local Whisper) work fine** without CORS issues
+  - See [MDN CORS Guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) for more details
 
 ## Customizing the System Prompt
 
