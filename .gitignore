@@ -13,3 +13,4 @@ Thumbs.db
 
 # Project-specific
 REFACTORING_SUMMARY.md
+tests/keys.json
