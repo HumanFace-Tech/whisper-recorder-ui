@@ -93,6 +93,11 @@ class WhisperAPI {
     formData.append('file', audioBlob, 'recording.wav');
     formData.append('model', whisper.model);
     formData.append('response_format', 'json'); // More reliable than 'text' for parsing
+    
+    // Add optional prompt parameter if provided
+    if (whisper.prompt && whisper.prompt.trim()) {
+      formData.append('prompt', whisper.prompt.trim());
+    }
 
     try {
       const response = await fetch(whisper.endpoint, {

@@ -4,7 +4,8 @@ const DEFAULT_CONFIG = {
     endpoint: '/asr',
     apiFormat: 'local', // 'local' | 'openai'
     apiKey: '',
-    model: 'whisper-large-v3-turbo'
+    model: 'whisper-large-v3-turbo',
+    prompt: '' // Optional: Guide transcription with context, proper nouns, or style
   },
   llm: {
     apiFormat: 'ollama', // 'ollama' | 'openai' | 'custom'

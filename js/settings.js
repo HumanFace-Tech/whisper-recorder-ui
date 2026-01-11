@@ -9,7 +9,8 @@ const PRESETS = {
         endpoint: 'https://api.groq.com/openai/v1/audio/transcriptions',
         apiFormat: 'openai',
         model: 'whisper-large-v3',
-        apiKey: '' // User needs to fill this in
+        apiKey: '', // User needs to fill this in
+        prompt: 'Technical discussion. Use proper punctuation and capitalization.'
       },
       llm: {
         endpoint: 'https://api.groq.com/openai/v1/chat/completions',
@@ -30,7 +31,8 @@ const PRESETS = {
         endpoint: 'https://api.openai.com/v1/audio/transcriptions',
         apiFormat: 'openai',
         model: 'whisper-1',
-        apiKey: '' // User needs to fill this in
+        apiKey: '', // User needs to fill this in
+        prompt: 'Technical discussion. Use proper punctuation and capitalization.'
       },
       llm: {
         endpoint: 'https://api.openai.com/v1/chat/completions',
@@ -282,15 +284,26 @@ class SettingsManager {
             <label for="whisper-model">Model</label>
             <select id="whisper-model">
               <option value="whisper-large-v3-turbo" ${whisper.model === 'whisper-large-v3-turbo' ? 'selected' : ''}>
-                whisper-large-v3-turbo (Fast, multilingual)
+                whisper-large-v3-turbo (Fast, multilingual - recommended)
               </option>
               <option value="whisper-large-v3" ${whisper.model === 'whisper-large-v3' ? 'selected' : ''}>
                 whisper-large-v3 (Highest accuracy)
               </option>
-              <option value="distil-whisper-large-v3-en" ${whisper.model === 'distil-whisper-large-v3-en' ? 'selected' : ''}>
-                distil-whisper-large-v3-en (Fastest, English-only)
-              </option>
             </select>
+          </div>
+          
+          <div class="form-row">
+            <label for="whisper-prompt">
+              Transcription Prompt (Optional)
+              <span style="font-size: 0.85em; color: var(--text-muted); font-weight: normal;">
+                Guide transcription with context, proper nouns, or style
+              </span>
+            </label>
+            <textarea id="whisper-prompt" rows="3" 
+                      placeholder="Examples:&#10;• Meeting with Sarah Chen about the Kubernetes project.&#10;• Technical discussion. Proper punctuation and capitalization.&#10;• Company names: OpenAI, HumanFace Tech, WhisperBot">${whisper.prompt || ''}</textarea>
+            <small style="color: var(--text-muted); font-size: 0.85em; margin-top: 4px; display: block;">
+              💡 Tip: Include names, technical terms, or an example sentence with desired punctuation style
+            </small>
           </div>
           
           <div class="form-row">
@@ -622,11 +635,13 @@ class SettingsManager {
     const whisperFormat = document.getElementById('whisper-format');
     const whisperKey = document.getElementById('whisper-key');
     const whisperModel = document.getElementById('whisper-model');
+    const whisperPrompt = document.getElementById('whisper-prompt');
 
     if (whisperEndpoint) config.whisper.endpoint = whisperEndpoint.value || '';
     if (whisperFormat) config.whisper.apiFormat = whisperFormat.value || 'local';
     if (whisperKey) config.whisper.apiKey = whisperKey.value || '';
     if (whisperModel) config.whisper.model = whisperModel.value || 'whisper-large-v3-turbo';
+    if (whisperPrompt) config.whisper.prompt = whisperPrompt.value || '';
 
     // LLM settings
     const llmFormat = document.getElementById('llm-format');
