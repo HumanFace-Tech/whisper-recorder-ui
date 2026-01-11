@@ -292,6 +292,13 @@ class SettingsManager {
               </option>
             </select>
           </div>
+          
+          <div class="form-row">
+            <button class="btn btn-secondary btn-sm" id="test-whisper-connection">
+              <span class="material-icons">cloud_done</span>
+              Test Connection
+            </button>
+          </div>
         </div>
       </div>
       
@@ -371,10 +378,18 @@ class SettingsManager {
           <div class="form-row">
             <label for="llm-temperature">Temperature</label>
             <input type="range" id="llm-temperature" min="0" max="2" step="0.1" 
-                   value="${llm.temperature || 0.7}">
+                    value="${llm.temperature || 0.7}">
             <span class="range-value">${llm.temperature || 0.7}</span>
           </div>
+
+          <div class="form-row">
+            <button class="btn btn-secondary btn-sm" id="test-llm-connection">
+              <span class="material-icons">cloud_done</span>
+              Test Connection
+            </button>
+          </div>
         </div>
+
       </div>
 
       <div class="settings-group collapsed">
@@ -475,6 +490,50 @@ class SettingsManager {
       input.addEventListener('input', debouncedSave);
       input.addEventListener('change', debouncedSave);
     });
+
+    // Test connection buttons
+    this.content.querySelector('#test-whisper-connection')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await this.testConnection('whisper');
+    });
+
+    this.content.querySelector('#test-llm-connection')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await this.testConnection('llm');
+    });
+  }
+
+  async testConnection(type) {
+    const config = configManager.config;
+    const btn = document.getElementById(`test-${type}-connection`);
+    const originalContent = btn.innerHTML;
+    
+    try {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-icons rotating">sync</span> Testing...';
+      
+      const api = type === 'whisper' ? new WhisperAPI(config) : new LLMAPI(config);
+      const success = await api.testConnection();
+      
+      if (success) {
+        Toast.success(`${type.toUpperCase()} connection successful!`);
+        btn.innerHTML = '<span class="material-icons">check_circle</span> Success';
+        btn.classList.add('btn-success');
+      } else {
+        throw new Error('Connection check failed');
+      }
+    } catch (error) {
+      console.error(`${type} test failed:`, error);
+      Toast.error(`${type.toUpperCase()} connection failed: ${error.message}`);
+      btn.innerHTML = '<span class="material-icons">error</span> Failed';
+      btn.classList.add('btn-danger');
+    } finally {
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+        btn.classList.remove('btn-success', 'btn-danger');
+      }, 3000);
+    }
   }
 
   switchTab(tabName) {
