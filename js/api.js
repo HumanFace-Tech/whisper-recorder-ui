@@ -245,7 +245,8 @@ class LLMAPI {
           { role: 'system', content: llm.systemPrompt },
           { role: 'user', content: `Raw Transcribed Text: ${text}` }
         ],
-        temperature: llm.temperature || 0.3
+        temperature: llm.temperature || 0.3,
+        max_completion_tokens: llm.maxCompletionTokens || 8192
       };
 
       const response = await fetch(llm.endpoint, {

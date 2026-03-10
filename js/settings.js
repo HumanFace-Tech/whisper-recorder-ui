@@ -403,6 +403,13 @@ class SettingsManager {
           </div>
 
           <div class="form-row">
+            <label for="llm-max-completion-tokens">Max Completion Tokens</label>
+            <input type="range" id="llm-max-completion-tokens" min="256" max="131072" step="256" 
+                    value="${llm.maxCompletionTokens || 8192}">
+            <span class="range-value">${llm.maxCompletionTokens || 8192}</span>
+          </div>
+
+          <div class="form-row">
             <button class="btn btn-secondary btn-sm test-connection-btn" id="test-llm-connection" type="button">
               <span class="material-icons">cloud_done</span>
               Test Connection
@@ -656,6 +663,7 @@ class SettingsManager {
     const llmKey = document.getElementById('llm-key');
     const llmModel = document.getElementById('llm-model');
     const llmTemperature = document.getElementById('llm-temperature');
+    const llmMaxCompletionTokens = document.getElementById('llm-max-completion-tokens');
     const llmPrompt = document.getElementById('llm-prompt');
     const llmEnabled = document.getElementById('llm-enabled');
 
@@ -664,6 +672,7 @@ class SettingsManager {
     if (llmKey) config.llm.apiKey = llmKey.value || '';
     if (llmModel) config.llm.model = llmModel.value || '';
     if (llmTemperature) config.llm.temperature = parseFloat(llmTemperature.value) || 0.7;
+    if (llmMaxCompletionTokens) config.llm.maxCompletionTokens = parseInt(llmMaxCompletionTokens.value) || 8192;
     if (llmPrompt) config.llm.systemPrompt = llmPrompt.value || '';
     if (llmEnabled) config.llm.enabled = llmEnabled.checked;
 

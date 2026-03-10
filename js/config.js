@@ -13,6 +13,7 @@ const DEFAULT_CONFIG = {
     model: 'qwen2.5-coder:14b',
     apiKey: '',
     temperature: 0.7,
+    maxCompletionTokens: 8192,
     enabled: true,
     systemPrompt: `You are a tool - a text processing assistant. Take the raw transcribed text and:
 1. Fix any grammar, spelling or transcribing issues (especially when it comes for programming terms, example 'length views integration' should become 'LangFuse Integration' and "slash var slash www" should become "/var/www"; or "c colon slash slash dubdubdub" should become "c://www".
